@@ -10,6 +10,9 @@ app.use(express.json())
 
 const uri = `mongodb+srv://${process.env.MOVIE_USER}:${process.env.MOVIE_PASS}@cluster0.a47ogqg.mongodb.net/?appName=Cluster0`;
 
+// const uri = `mongodb+srv://${process.env.MOVIE_USER}:${process.env.MOVIE_PASS}@cluster0.a47ogqg.mongodb.net/?appName=Cluster0`;
+// const uri = "mongodb+srv://<db_username>:<db_password>@cluster0.a47ogqg.mongodb.net/?appName=Cluster0";
+
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -73,7 +76,7 @@ async function run() {
       res.send(result)
     })
 
-    app.post('/allMovies/add',verifyFirebaseToken,async(req,res) => {
+    app.post('/allMovies/add',async(req,res) => {
         const newMovies = req.body;
         const result = await moviesCollection.insertOne(newMovies)
         res.send(result)
