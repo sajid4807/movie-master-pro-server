@@ -44,6 +44,17 @@ async function run() {
         res.send(result)
       }
     })
+    app.get('/movies',async(req,res) => {
+        const cursor = moviesCollection.find().sort({releaseYear: -1}).limit(6)
+        const result = await cursor.toArray()
+        res.send(result)
+    })
+    app.get('/allMovies',async(req,res) => {
+      // console.log(req.query)
+        const cursor = moviesCollection.find()
+        const result = await cursor.toArray()
+        res.send(result)
+    
     
 
     await client.db("admin").command({ ping: 1 });
