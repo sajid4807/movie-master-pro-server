@@ -72,6 +72,27 @@ async function run() {
       const result = await moviesCollection.find({addedBy: email}).toArray()
       res.send(result)
     })
+
+    app.post('/allMovies/add',verifyFirebaseToken,async(req,res) => {
+        const newMovies = req.body;
+        const result = await moviesCollection.insertOne(newMovies)
+        res.send(result)
+    })
+
+     app.patch('/allMovies/:id',async(req,res) => {
+        const id = req.params.id;
+        const movie = await moviesCollection.findOne({_id : new ObjectId(id)})
+        const updateMovies = req.body;
+        if(movie.addedBy !== req.token_email){
+          return res.status(403).send({ message: 'You are not allowed to update this movie' });
+        }
+        const query = {_id: new ObjectId(id)}
+        const update = {
+            $set: updateMovies,
+        }
+        const result = await moviesCollection.updateOne(query,update)
+        res.send(result)
+    })
     
 
     await client.db("admin").command({ ping: 1 });
