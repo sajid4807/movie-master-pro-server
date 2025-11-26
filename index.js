@@ -54,7 +54,24 @@ async function run() {
         const cursor = moviesCollection.find()
         const result = await cursor.toArray()
         res.send(result)
-    
+    })
+
+    app.get('/allMovies/:id', async(req,res) => {
+        const id = req.params.id;
+        // const query ={_id: id}
+        const query = { _id: new ObjectId(id) }
+        const result = await moviesCollection.findOne(query)
+        res.send(result)
+    })
+
+    app.get('/my-collection',async(req,res) => {
+      const email = req.query.email
+      if(email !== req.token_email){
+        return res.status(403).send({message: 'Forbidden Access'})
+      }
+      const result = await moviesCollection.find({addedBy: email}).toArray()
+      res.send(result)
+    })
     
 
     await client.db("admin").command({ ping: 1 });
