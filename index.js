@@ -52,6 +52,12 @@ async function run() {
     const userCollection = db.collection("user");
     const watchCollection = db.collection("watch");
 
+    app.get('/user',async(req,res) => {
+      const cursor = userCollection.find()
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
     app.post("/user", async (req, res) => {
       const newUser = req.body;
       const email = req.body.email;
@@ -98,16 +104,19 @@ async function run() {
       const result = await moviesCollection.insertOne(newMovies);
       res.send(result);
     });
+
+
     app.get("/my-watch-list", async (req, res) => {
       const email = req.query.email;
       const result = await watchCollection.find({ watch_by: email }).toArray();
       res.send(result);
     });
     app.post("/watch-list", async (req, res) => {
-      const newMovies = req.body;
+      const {_id,...newMovies} = req.body;
       const result = await watchCollection.insertOne(newMovies);
       res.send(result);
     });
+
 
     app.patch("/allMovies/:id", verifyFirebaseToken, async (req, res) => {
       const id = req.params.id;
