@@ -23,6 +23,7 @@ const verifyFirebaseToken = async (req, res, next) => {
   try {
     const decoded = await admin.auth().verifyIdToken(token);
     req.token_email = decoded.email;
+    // console.log(authorization,token,decoded)
     next();
   } catch (error) {
     return res.status(401).send({ message: "unauthorize access" });
@@ -106,7 +107,7 @@ async function run() {
     });
 
 
-    app.get("/my-watch-list", async (req, res) => {
+    app.get("/my-watch-list",verifyFirebaseToken, async (req, res) => {
       const email = req.query.email;
       const result = await watchCollection.find({ watch_by: email }).toArray();
       res.send(result);
@@ -118,7 +119,7 @@ async function run() {
     });
 
 
-    app.patch("/allMovies/:id", verifyFirebaseToken, async (req, res) => {
+    app.patch("/allMovies/:id",verifyFirebaseToken, async (req, res) => {
       const id = req.params.id;
       const movie = await moviesCollection.findOne({ _id: new ObjectId(id) });
       const updateMovies = req.body;
@@ -134,14 +135,20 @@ async function run() {
       const result = await moviesCollection.updateOne(query, update);
       res.send(result);
     });
-    app.delete("/allMovies/:id", async (req, res) => {
+    app.delete("/allMovies/:id",verifyFirebaseToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
+      const post =await moviesCollection.findOne(query)
+        if (!post) {
+    return res.status(404).send({ message: "Movie not found" });
+  }
+
+  if (post.addedBy !== req.token_email) {
+    return res.status(403).send({ message: "You are not allowed to delete this movie" });
+  }
       const result = await moviesCollection.deleteOne(query);
       res.send(result);
     });
-
-    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
